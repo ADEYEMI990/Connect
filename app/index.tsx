@@ -1,12 +1,5 @@
-import { Image, Pressable, Text, TouchableOpacity, View } from "react-native";
-import { styles } from "../styles/auth.styles";
+import { Redirect } from 'expo-router'
 
 export default function Index() {
-  return (
-    <View
-      style={styles.container}
-    >
-    </View>
-  );
+  return <Redirect href="/(tabs)" />;
 }
-
