@@ -1,5 +1,6 @@
 import { v } from "convex/values";
-import { mutation } from "./_generated/server";
+import { mutation, query } from "./_generated/server";
+import { getAuthenticatedUser } from "./users";
 
 export const generateUploadUrl = mutation(async (ctx) => {
   const identity = await ctx.auth.getUserIdentity();
@@ -16,17 +17,7 @@ export const createPost = mutation({
   },
   handler: async (ctx, args) => {
     // Ensure the user is authenticated
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) {
-      throw new Error("Unauthorized: User identity is required to create a post.");
-    }
-    
-    const currentUser = await ctx.db.query("users")
-      .withIndex("by_clerk_id", (q) => q.eq("clerkId", identity.subject)).first();
-
-    if (!currentUser) {
-      throw new Error("User not found: Please ensure you are registered.");
-    }
+    const currentUser = await getAuthenticatedUser(ctx);
 
     const imageUrl = await ctx.storage.getUrl(args.storageId);
     if (!imageUrl) throw new Error("Image upload failed: Unable to retrieve image URL.");  
@@ -50,3 +41,59 @@ export const createPost = mutation({
     return postId; // Return the ID of the newly created post
   },
 });
+
+export const getFeedPosts = query({
+  handler: async (ctx) => {
+    const currentUser = await getAuthenticatedUser(ctx);
+
+    // Fetch posts from the database, ordered by creation time in descending order
+    const posts = await ctx.db.query("posts").order("desc").collect();
+
+    if (!posts || posts.length === 0) {
+      return []; // Return an empty array if no posts are found
+    }
+
+    // enhance posts with userdata and interaction status
+    const postsWithInfo = await Promise.all(
+      posts.map(async (post) => {
+        // Fetch the user who created the post
+        const postAuthor = await ctx.db.get(post.userId);
+
+        // Check if the current user has liked this post
+        const Like = await ctx.db.query("likes")
+          .withIndex("by_user_and_post", (q) => q
+            .eq("userId", currentUser._id)
+            .eq("postId", post._id))
+          .first();
+
+        // Check if the current user has bookmarks this post
+        const bookmarks = await ctx.db.query("bookmarks")
+          .withIndex("by_user_and_post", (q) => q
+          .eq("userId", currentUser._id)
+            .eq("postId", post._id))
+          .first();
+
+
+        // Check if the current user has commented on this post
+        // const hasCommented = await ctx.db.query("comments")
+        //   .withIndex("by_user_and_post", (q) => q
+        //     .eq("userId", currentUser._id)
+        //     .eq("postId", post._id))
+        //   .first();
+
+        return {
+          ...post,
+          author:{
+            _id:postAuthor?._id,
+            username: postAuthor?.username,
+            Image:postAuthor?.image
+          },
+          isLiked: !!Like, // Convert to boolean
+          isBookmarked: !!bookmarks, // Convert to boolean
+        };
+      })
+    )
+
+    return postsWithInfo;
+  }  
+})
