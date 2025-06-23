@@ -49,15 +49,13 @@ export const getFeedPosts = query({
     // Fetch posts from the database, ordered by creation time in descending order
     const posts = await ctx.db.query("posts").order("desc").collect();
 
-    if (!posts || posts.length === 0) {
-      return []; // Return an empty array if no posts are found
-    }
-
+    if (posts.length === 0) return []; // Return an empty array if no posts are found
+    
     // enhance posts with userdata and interaction status
     const postsWithInfo = await Promise.all(
       posts.map(async (post) => {
         // Fetch the user who created the post
-        const postAuthor = await ctx.db.get(post.userId);
+        const postAuthor = (await ctx.db.get(post.userId))!;
 
         // Check if the current user has liked this post
         const Like = await ctx.db.query("likes")
@@ -86,7 +84,7 @@ export const getFeedPosts = query({
           author:{
             _id:postAuthor?._id,
             username: postAuthor?.username,
-            Image:postAuthor?.image
+            image:postAuthor?.image
           },
           isLiked: !!Like, // Convert to boolean
           isBookmarked: !!bookmarks, // Convert to boolean
@@ -96,4 +94,50 @@ export const getFeedPosts = query({
 
     return postsWithInfo;
   }  
+});
+
+export const toggleLike = mutation({
+  args: {postId: v.id("posts"), // ID of the post to like/unlike
+    },
+  handler: async (ctx, args) => {
+    const currentUser = await getAuthenticatedUser(ctx);
+
+    // Check if the post already liked by the user
+    const existingLike = await ctx.db.query("likes")
+      .withIndex("by_user_and_post", (q) => q
+        .eq("userId", currentUser._id)
+        .eq("postId", args.postId))
+      .first();
+
+      // check if the post exists
+    const post = await ctx.db.get(args.postId); 
+    if (!post) throw new Error("Post not found");
+    
+    if (existingLike) {
+      // If the post is already liked, remove the like
+      await ctx.db.delete(existingLike._id);
+      // Decrement the likes count on the post
+      await ctx.db.patch(args.postId, { likes: post.likes - 1 });
+      return false; // Return false to indicate the post was unliked  
+    } else {
+      // If the post is not liked, add a new like
+      await ctx.db.insert("likes", {
+        userId: currentUser._id,
+        postId: args.postId,
+      });
+      // Increment the likes count on the post
+      await ctx.db.patch(args.postId, { likes: post.likes + 1 });
+
+      // if it's not my post, send a notification to the post author
+      if (currentUser._id !== post.userId) {
+        await ctx.db.insert("notifications", {
+          receiverId: post.userId, 
+          type: "like",
+          postId: args.postId,
+          senderId: currentUser._id, 
+        });
+      }
+      return true; // Return true to indicate the post was liked
+    }
+  }
 })

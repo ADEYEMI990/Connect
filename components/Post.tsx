@@ -4,9 +4,45 @@ import { Link } from 'expo-router'
 import { Image } from 'expo-image'
 import { Ionicons } from '@expo/vector-icons'
 import { COLORS } from '@/constants/theme'
+import { Id } from '@/convex/_generated/dataModel'
+import { useState } from 'react'
+import { useMutation } from 'convex/react'
+import { api } from '@/convex/_generated/api'
 
-// todo: fix the type of post
-export default function Post({post}: { post: any }) {
+type postProps = {
+  post: {
+    _id: Id<"posts">;
+    imageurl: string;
+    caption?: string;
+    likes: number;
+    comments: number;
+    _creationTime: number;
+    isLiked: boolean;
+    isBookmarked: boolean;
+    author: {
+      _id: Id<"users">;
+      username: string;
+      image: string;
+    };
+  };
+};
+
+export default function Post({post}:  postProps ) {
+  const [  isLiked, setIsLiked] = useState(post.isLiked);
+  const [ likesCount, setLikesCount] = useState(post.likes);
+
+  const toggleLike = useMutation(api.posts.toggleLike);
+
+  const handlelike = async () => {
+    try {
+      const newIsLiked = await toggleLike({ postId: post._id });
+      setIsLiked(newIsLiked);
+      setLikesCount(prev => (newIsLiked ? prev + 1 : prev - 1));
+    } catch (error) {
+      console.error("Error toggling like:", error);
+    }
+  }
+
   return (
     <View style={styles.post}>
       {/* POST HEADER */}
@@ -39,7 +75,7 @@ export default function Post({post}: { post: any }) {
 
       {/* POST IMAGE */}
       <Image
-        source={post.image}
+        source={post.imageurl}
         style={styles.postImage}
         contentFit="cover"
         transition={200}
@@ -50,8 +86,8 @@ export default function Post({post}: { post: any }) {
 
       <View style={styles.postActions}>
         <View style={styles.postActionsLeft}>
-        <TouchableOpacity>
-          <Ionicons name="heart-outline" size={24} color={COLORS.white} />
+        <TouchableOpacity onPress={handlelike}>
+          <Ionicons name={isLiked ? "heart" : "headset-outline"} size={24} color={isLiked ? COLORS.primary : COLORS.white} />
         </TouchableOpacity>
         <TouchableOpacity>
           <Ionicons name="chatbubble-outline" size={24} color={COLORS.white} />
@@ -65,7 +101,7 @@ export default function Post({post}: { post: any }) {
       {/* POST INFO */}
       <View style={styles.postInfo}>
         <Text style={styles.likesText}>
-          Be first to like this post
+          {likesCount > 0 ? `${likesCount.toLocaleString()} likes` : "Be the first to like"}
         </Text>
         { post.caption && (
           <View style={styles.captionContainer}>

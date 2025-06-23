@@ -50,7 +50,7 @@ export default defineSchema({
     .index("by_following", ["followingId"])
     .index("by_both", ["followerId", "followingId"]),
 
-  Notifications: defineTable({
+  notifications: defineTable({
     // Define the schema for the notifications table
     receiverId: v.id("users"),
     senderId: v.id("users"),
