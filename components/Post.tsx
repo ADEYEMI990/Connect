@@ -8,6 +8,8 @@ import { Id } from '@/convex/_generated/dataModel'
 import { useState } from 'react'
 import { useMutation } from 'convex/react'
 import { api } from '@/convex/_generated/api'
+import CommentsModal from './CommentsModal'
+import { formatDistanceToNow } from 'date-fns'
 
 type postProps = {
   post: {
@@ -30,6 +32,8 @@ type postProps = {
 export default function Post({post}:  postProps ) {
   const [  isLiked, setIsLiked] = useState(post.isLiked);
   const [ likesCount, setLikesCount] = useState(post.likes);
+  const [ commentsCount, setCommentsCount] = useState(post.comments);
+  const [showComments, setShowComments] = useState(false);
 
   const toggleLike = useMutation(api.posts.toggleLike);
 
@@ -89,7 +93,7 @@ export default function Post({post}:  postProps ) {
         <TouchableOpacity onPress={handlelike}>
           <Ionicons name={isLiked ? "heart" : "headset-outline"} size={24} color={isLiked ? COLORS.primary : COLORS.white} />
         </TouchableOpacity>
-        <TouchableOpacity>
+        <TouchableOpacity onPress={() => setShowComments(true)}>
           <Ionicons name="chatbubble-outline" size={24} color={COLORS.white} />
         </TouchableOpacity>
         </View>
@@ -111,7 +115,27 @@ export default function Post({post}:  postProps ) {
               <Text style={styles.captionText}>{post.caption}</Text>
           </View>
         )}
+
+        {commentsCount > 0 && (
+          <TouchableOpacity onPress={() => setShowComments(true)}>
+          <Text style={styles.commentsText}>
+            View all {commentsCount} comments
+          </Text>
+        </TouchableOpacity>
+        )}
+
+        <Text style={styles.timeAgo}>
+          {formatDistanceToNow(post._creationTime, { addSuffix: true })}
+        </Text>
       </View>
+
+      {/* POST COMMENTS */}
+      <CommentsModal
+        postId={post._id}
+        visible={showComments}
+        onClose={() => setShowComments(false)}
+        onCommentAdded={() => setCommentsCount((prev) => prev + 1)}
+      />
     </View>
   )
 }

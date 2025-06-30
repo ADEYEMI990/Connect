@@ -9,7 +9,7 @@ SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
   const [fontsLoaded] = useFonts({
-    "JetBrainsMono-medium": require("../assets/fonts/JetBrainsMono-medium.ttf"),
+    "JetBrainsMono-Medium": require("../assets/fonts/JetBrainsMono-Medium.ttf"),
   })
 
   const onLayoutRootView = useCallback(async() => {
