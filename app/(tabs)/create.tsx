@@ -71,6 +71,9 @@ export default function Create() {
         caption,
       });
 
+      setSelectedImage(null);
+      setCaption("");
+
       // Navigate back to the home screen or wherever you want
       router.push("/(tabs)");
 
