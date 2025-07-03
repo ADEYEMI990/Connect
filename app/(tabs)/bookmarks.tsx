@@ -7,7 +7,7 @@ import { COLORS } from '@/constants/theme';
 import { styles } from '@/styles/feed.styles';
 import { Image } from 'expo-image';
 
-export default function bookmarks() {
+export default function Bookmarks() {
   const bookmarkedPosts = useQuery(api.bookmarks.getBookmarkedPosts);
 
   if (bookmarkedPosts === undefined) return <Loader />;
@@ -34,7 +34,7 @@ export default function bookmarks() {
           return (
             <View key={post._id} style={{ width: "33.33%", padding: 1 }} >
               <Image 
-                source={{ uri: post.image }} 
+                source={post.imageUrl} 
                 style={{ width: "100%", aspectRatio: 1 }} 
                 contentFit="cover"
                 transition={200}

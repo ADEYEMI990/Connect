@@ -27,7 +27,7 @@ export const createPost = mutation({
       userId: currentUser._id, // Reference to the user who created the post
       likes: 0, // Initial number of likes
       comments: 0, // Initial number of comments
-      imageurl: imageUrl, // URL of the uploaded image
+      imageUrl: imageUrl, // URL of the uploaded image
       caption: args.caption,
       storageId: args.storageId,
       
@@ -180,6 +180,16 @@ export const deletePost = mutation({
 
     for (const bookmark of bookmarks) {
       await ctx.db.delete(bookmark._id);
+    }
+
+    // delete associated notifications
+    const notifications = await ctx.db
+      .query("notifications")
+      .withIndex("by_post", (q) => q.eq("postId", args.postId))
+      .collect();
+
+    for (const notification of notifications) {
+      await ctx.db.delete(notification._id);
     }
 
     // delete the storage file

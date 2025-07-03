@@ -18,7 +18,7 @@ export default defineSchema({
   posts: defineTable({
     // Define the schema for the posts table
     userId: v.id("users"),
-    imageurl: v.string(),
+    imageUrl: v.string(),
     storageId: v.id("_storage"), // Reference to the storage table and will be needed to delete a post
     caption: v.optional(v.string()),
     likes: v.number(),
@@ -56,8 +56,9 @@ export default defineSchema({
     senderId: v.id("users"),
     type: v.union(v.literal("like"), v.literal("comment"), v.literal("follow")),
     postId: v.optional(v.id("posts")),
-    CommentId: v.optional(v.id("comments")),
-  }).index("by_receiver", ["receiverId"]),
+    commentId: v.optional(v.id("comments")),
+  }).index("by_receiver", ["receiverId"])
+    .index("by_post", ["postId"]),
 
   bookmarks: defineTable({
     // Define the schema for the bookmarks table
