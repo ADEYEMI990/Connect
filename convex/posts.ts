@@ -127,6 +127,7 @@ export const toggleLike = mutation({
       });
       // Increment the likes count on the post
       await ctx.db.patch(args.postId, { likes: post.likes + 1 });
+      
 
       // if it's not my post, send a notification to the post author
       if (currentUser._id !== post.userId) {

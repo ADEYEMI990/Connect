@@ -33,7 +33,7 @@ export function Notification({ notification }: any) {
 
         <View style={styles.notificationInfo}>
           {/* todo: fix later */}
-          <Link href={`/notifications`} asChild>
+          <Link href={`/user/${notification.sender._id}`} asChild>
               <TouchableOpacity>
                 <Text style={styles.username}>{notification.sender.username}</Text>
               </TouchableOpacity>
