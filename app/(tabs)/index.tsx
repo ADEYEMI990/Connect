@@ -44,10 +44,10 @@ export default function Index() {
 
       <FlatList
         data={posts}
-        keyExtractor={(item) => item._id}
         renderItem={({ item }) => (
-          <Post post={{ ...item, imageurl: item.imageUrl }} />
+          <Post post={item} />
         )}
+        keyExtractor={(item) => item._id}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: 60 }}
         ListHeaderComponent={<StoriesSection />}

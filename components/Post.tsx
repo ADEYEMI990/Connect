@@ -15,7 +15,7 @@ import { useUser } from '@clerk/clerk-expo'
 type postProps = {
   post: {
     _id: Id<"posts">;
-    imageurl: string;
+    imageUrl: string;
     caption?: string;
     likes: number;
     comments: number;
@@ -106,7 +106,7 @@ export default function Post({post}:  postProps ) {
 
       {/* POST IMAGE */}
       <Image
-        source={post.imageurl}
+        source={post.imageUrl}
         style={styles.postImage}
         contentFit="cover"
         transition={200}
@@ -118,7 +118,7 @@ export default function Post({post}:  postProps ) {
       <View style={styles.postActions}>
         <View style={styles.postActionsLeft}>
         <TouchableOpacity onPress={handlelike}>
-          <Ionicons name={isLiked ? "heart" : "headset-outline"} size={24} color={isLiked ? COLORS.primary : COLORS.white} />
+          <Ionicons name={isLiked ? "heart" : "heart-outline"} size={24} color={isLiked ? COLORS.primary : COLORS.white} />
         </TouchableOpacity>
         <TouchableOpacity onPress={() => setShowComments(true)}>
           <Ionicons name="chatbubble-outline" size={24} color={COLORS.white} />

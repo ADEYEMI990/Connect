@@ -33,8 +33,8 @@ export default function Login() {
         <View style={styles.logoContainer}>
           <Ionicons name="leaf" size={32} color={COLORS.primary} />
         </View>
-        <Text style={styles.appName}>connect</Text>
-        <Text style={styles.tagline}>don't miss anything</Text>
+        <Text style={styles.appName}>Connect</Text>
+        <Text style={styles.tagline}>Do not miss anything</Text>
       </View>
 
       {/* ILLUSTRATION */}

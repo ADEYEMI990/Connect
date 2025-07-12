@@ -24,10 +24,13 @@ export default function RootLayout() {
     }
   })
 
-  const onLayoutRootView = useCallback(async() => {
-    if (!fontsLoaded)  
+  const onLayoutRootView = useCallback(async () => {
+    if (fontsLoaded) {
       await SplashScreen.hideAsync();
+    }
   }, [fontsLoaded]);
+
+  if (!fontsLoaded) return null;
   return (
     <ClerkAndConvexProvider>
       <SafeAreaProvider>

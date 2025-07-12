@@ -1,4 +1,4 @@
-import { v } from "convex/values";
+import { ConvexError, v } from "convex/values";
 import { mutation, query } from "./_generated/server";
 import { getAuthenticatedUser } from "./users";
 
@@ -45,6 +45,8 @@ export const createPost = mutation({
 export const getFeedPosts = query({
   handler: async (ctx) => {
     const currentUser = await getAuthenticatedUser(ctx);
+  
+    if (!currentUser) throw new ConvexError("Unauthorized: User identity is required to fetch feed posts.");
 
     // Fetch posts from the database, ordered by creation time in descending order
     const posts = await ctx.db.query("posts").order("desc").collect();

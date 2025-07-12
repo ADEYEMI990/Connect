@@ -114,7 +114,7 @@ export default function Create() {
       style={styles.container}
       keyboardVerticalOffset={Platform.OS === "ios" ? 100 : 0}
     >
-      <View style={styles.header}>
+      <View style={styles.contentContainer}>
         {/* HEADER */}
 
         <View style={styles.header}>
